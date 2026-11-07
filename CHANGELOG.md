@@ -9,4 +9,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Implement deterministic prompt compression library with code fence protection, filler word reduction, and CLI.
 - Initial project structure from the factory utility template.
