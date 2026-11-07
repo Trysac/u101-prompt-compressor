@@ -1,29 +1,12 @@
 # Architecture
 
-## Purpose
+## Overview
+`prompt_compressor` applies sequential, explainable compression stages to prompts while protecting sensitive instructions, entities, and code blocks.
 
-`trysac-prompt-compressor` is a small, dependency-free Python library: Deterministic prompt compression that keeps instructions, code and entities byte-exact, removes filler and redundant context, and reports token savings per rule
-
-## Shape
-
-```text
-caller code --> prompt_compressor (public API in __init__.py)
-                    |
-                    +-- pure functions, no I/O, no global state
-```
-
-- **Public API**: the names listed in `__all__` of `src/prompt_compressor/__init__.py`. Anything else is
-  internal and may change without a major version.
-- **Errors**: invalid input raises built-in exceptions (`ValueError`, `TypeError`) with a clear
-  message; the library never prints or exits.
-- **Side effects**: none. If a feature needs I/O, isolate it in its own module behind a small
-  interface and record the choice in an ADR.
-
-## Quality contract
-
-`scripts/check.py` is the single definition of the gates; `fabrica.json` tells the factory and CI
-how to run it. See [TESTING.md](TESTING.md).
-
-## Decisions
-
-Architecture decisions are recorded in [decisions/](decisions/) as numbered ADRs.
+### Pipeline Stages
+1. **Segmentation**: Fenced code blocks (` ``` `) are separated from prose lines. Unterminated fences treat remaining lines as code to avoid syntax alteration.
+2. **Protection Tagging**: Lines starting with instruction keywords (`you must`, `always`, `never`, etc., optionally prefixed by bullets), and sentences matching entity patterns (URLs, emails, numbers, quoted strings, custom keep patterns) are marked protected.
+3. **Whitespace Normalization**: Space/tab runs are collapsed to a single space; 3+ newlines are collapsed to 2.
+4. **Duplicate Line Removal**: Identical prose lines are removed after whitespace normalization.
+5. **Filler Replacement**: Idiomatic filler phrases (e.g., `in order to` -> `to`) are replaced outside protected spans with case preservation.
+6. **Sentence Dropping**: Unprotected sentences are scored by overlap with protected vocabulary and dropped lowest-score first until `target_ratio` is reached.
