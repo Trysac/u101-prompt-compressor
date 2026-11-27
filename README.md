@@ -4,8 +4,10 @@ Long prompts built from retrieved context, chat history, and boilerplate cost mo
 
 ## Installation
 
+Not published to PyPI yet. Install it from GitHub:
+
 ```bash
-pip install trysac-prompt-compressor
+pip install "git+https://github.com/Trysac/u101-prompt-compressor"
 ```
 
 ## Usage
